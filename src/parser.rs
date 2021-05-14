@@ -46,6 +46,7 @@ impl TokenKind {
     }
 }
 
+#[derive(Clone)]
 struct Token {
     kind: TokenKind,
     text: String,
@@ -67,12 +68,12 @@ pub struct Diagnostic {
 
 
 impl Parser<'_> {
-    //fn nth_chr(&self, offset: usize) -> char {
-    //    match self.source.chars().nth(self.pos + offset) {
-    //        Some(c) => c,
-    //        None => '\0'
-    //    }
-    //}
+    fn nth_chr(&self, offset: usize) -> char {
+        match self.source.chars().nth(self.pos + offset) {
+            Some(c) => c,
+            None => '\0'
+        }
+    }
 
     fn curr_chr(&self) -> char {
         match self.source.chars().nth(self.pos) {
@@ -145,8 +146,25 @@ impl Parser<'_> {
 
             c if c.is_alphabetic() => {
                 let start = self.pos;
-                let ident = self.chr_take_while(|c| c.is_alphabetic());
+                let ident = self.chr_take_while(|c| c.is_alphabetic() || c == '_' || c.is_digit(10));
                 Token::new(TokenKind::keyword_from_str(&ident), ident, start)
+            }
+
+            '/' => {
+                self.pos += 1;
+                if self.curr_chr() == '/' {
+                    while self.curr_chr() != '\n' && self.curr_chr() != '\0' {
+                        self.pos += 1;
+                    }
+                } else if self.curr_chr() == '*' {
+                    self.pos += 1;
+                    while self.curr_chr() != '*' || self.nth_chr(1) != '/' {
+                        self.pos += 1;
+                    }
+                    self.pos += 2;
+                }
+                
+                self.consume_token()
             }
 
             c @ _ => {
@@ -197,8 +215,13 @@ impl Parser<'_> {
             Capsulation::Public
         };
 
+
         let field_type = self.consume_expected(TokenKind::Identifier);
-        let name = self.consume_expected(TokenKind::Identifier);
+        let (name, is_constructor) = if self.curr_token().kind == TokenKind::OpenParen {
+            (field_type.clone(), true)
+        } else {
+            (self.consume_expected(TokenKind::Identifier), false)
+        };
 
         if self.consume_optional(TokenKind::OpenParen) {
             let mut start_pos = self.pos;
@@ -244,7 +267,12 @@ impl Parser<'_> {
                 }
             }
 
-            Declaration::Method(Method::new(name.text, Type(field_type.text), params, capsulation))
+            Declaration::Method(
+                if is_constructor {
+                    Method::new_constructor(name.text, params, capsulation)
+                } else {
+                    Method::new(name.text, Type(field_type.text), params, capsulation)
+                })
         } else {
             self.consume_expected(TokenKind::SemiColon);
             Declaration::Field(Field::new(Type(field_type.text), name.text, capsulation))

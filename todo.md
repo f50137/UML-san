@@ -1,13 +1,13 @@
 # UML-san todo
 ## Renderer
 -   [ ] Check for more edge-cases (no methods/no fields/Large Class name)
--   [ ] Use different Font
+-   [x] Use different Font
 -   [ ] Make Heading (Class name) bigger
 -   [ ] Save to png file
 
 ## Parser
--   [ ] Parse comments
--   [ ] Parse constructor
+-   [x] Parse comments
+-   [x] Parse constructor
 -   [ ] Parse Array declarations and type annotations
 -   [ ] Parse field default definitions
 -   [ ] Parse/ignore more keywords (static/abstract/final)

@@ -55,13 +55,24 @@ pub struct Method {
     pub name: String,
     pub return_type: Type,
     pub parameters: Vec<Parameter>,
-    pub capsulation: Capsulation
+    pub capsulation: Capsulation,
 }
 
 impl Method {
+    pub fn is_constructor(&self) -> bool {
+        let Type(type_name) = &self.return_type;
+        type_name.len() == 0
+    }
+
     pub fn new(name: String, return_type: Type, parameters: Vec<Parameter>, capsulation: Capsulation) -> Self {
         Self {
-            name, return_type, parameters, capsulation
+            name, return_type, parameters, capsulation,
+        }
+    }
+
+    pub fn new_constructor(name: String, parameters: Vec<Parameter>, capsulation: Capsulation) -> Self {
+        Self {
+            name, return_type: Type("".to_string()), parameters, capsulation,
         }
     }
 
@@ -74,10 +85,16 @@ impl Method {
                 out.push_str(&format!("{}, ", self.parameters[i].to_string()));
             }
 
-            out.push_str(&format!("{}): {}", self.parameters.last().unwrap().to_string(), return_type_name));
+            out.push_str(&format!("{})", self.parameters.last().unwrap().to_string()));
+            if !self.is_constructor() {
+                out.push_str(&format!(": {}", return_type_name))
+            }
         } else {
-
-            out.push_str(&format!("): {}", return_type_name));
+            if self.is_constructor() {
+                out.push(')');
+            } else {
+                out.push_str(&format!("): {}", return_type_name));
+            }
         }
 
         out
