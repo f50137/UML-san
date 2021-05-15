@@ -7,6 +7,7 @@ class Person {
     // Yesu yesu kawaii desu
     private int age; 
     private String name;
+    private Person[] family = { new Person(23, "Father"), new Person(23, "Mother") };
 
     public int getAge() {
         return age;
@@ -33,7 +34,7 @@ class Person {
         if (age != 23) {
             return "Yesu";
         } else {
-            return "";
+            return "Nested blocks in functions also work";
         }
     }
 }

@@ -21,8 +21,14 @@ fn render_class_font(rl: &mut RaylibDrawHandle, class: &Class, start_x: i32, sta
     let field_strs = class.fields.iter().map(|f| f.to_string()).collect::<Vec<_>>();
     let method_strs = class.methods.iter().map(|f| f.to_string()).collect::<Vec<_>>();
 
-    let max_field_text_width = field_strs.iter().map(|f| measure_text_ex(font, f, FONT_SIZE as f32, SPACING).x as i32).max().unwrap();
-    let max_method_text_width = method_strs.iter().map(|f| measure_text_ex(font, f, FONT_SIZE as f32, SPACING).x as i32).max().unwrap();
+    let max_field_text_width = field_strs.iter()
+                                         .map(|f| measure_text_ex(font, f, FONT_SIZE as f32, SPACING).x as i32)
+                                         .max().unwrap_or(0);
+    
+    let max_method_text_width = method_strs.iter()
+                                           .map(|f| measure_text_ex(font, f, FONT_SIZE as f32, SPACING).x as i32)
+                                           .max().unwrap_or(0);
+
     let class_name_width = measure_text_ex(font, &class.name, FONT_SIZE as f32, SPACING).x as i32;
 
     let uml_width = cmp::max(class_name_width, cmp::max(max_field_text_width, max_method_text_width)) + UML_PADDING * 2;
@@ -79,7 +85,9 @@ fn main() -> io::Result<()> {
     
     let font_result = rl.load_font(&thread, "font.ttf");
     let font;
+
     if font_result.is_err() {
+        println!("Could not load font!");
         std::process::exit(1);
     } else {
         font = font_result.unwrap();
@@ -89,7 +97,6 @@ fn main() -> io::Result<()> {
         let mut d = rl.begin_drawing(&thread);
         d.clear_background(Color::RAYWHITE);
         render_class_font(&mut d, &class, 23, 23, &font);
-        //render_class(&mut d, &class, 23, 23);
     }
 
     Ok(())

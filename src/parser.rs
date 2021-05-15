@@ -31,6 +31,7 @@ enum TokenKind {
     
     SemiColon,
     Comma,
+    Equal,
     
     Eof,
 }
@@ -143,10 +144,15 @@ impl Parser<'_> {
                 self.pos += 1;
                 Token::new(TokenKind::Comma, ",".to_string(), self.pos - 1)
             },
+            
+            '=' => {
+                self.pos += 1;
+                Token::new(TokenKind::Equal, "=".to_string(), self.pos - 1)
+            },
 
             c if c.is_alphabetic() => {
                 let start = self.pos;
-                let ident = self.chr_take_while(|c| c.is_alphabetic() || c == '_' || c.is_digit(10));
+                let ident = self.chr_take_while(|c| c.is_alphabetic() || c == '_' || c.is_digit(10) || c == '[' || c == ']');
                 Token::new(TokenKind::keyword_from_str(&ident), ident, start)
             }
 
@@ -274,6 +280,13 @@ impl Parser<'_> {
                     Method::new(name.text, Type(field_type.text), params, capsulation)
                 })
         } else {
+            if self.curr_token().kind == TokenKind::Equal {
+                self.consume_token();
+                while self.curr_chr() != ';' && self.curr_chr() != '\0' {
+                    self.pos += 1;
+                }
+            }
+
             self.consume_expected(TokenKind::SemiColon);
             Declaration::Field(Field::new(Type(field_type.text), name.text, capsulation))
         }
