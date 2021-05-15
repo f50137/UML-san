@@ -188,7 +188,7 @@ impl Parser<'_> {
         tok
     }
 
-    fn consume_expected(&mut self, kind: TokenKind) -> Token {
+    fn consume_expected(&mut self, kind: TokenKind) -> Option<Token> {
         let token = self.consume_token();
 
         if token.kind != kind {
@@ -196,9 +196,11 @@ impl Parser<'_> {
                 format!("Unexpected Token of kind {:?}, expected {:?}", 
                         token.kind, kind),
                 token.pos);
+            None
+        } else {
+            Some(token)
         }
 
-        token
     }
 
     fn consume_optional(&mut self, kind: TokenKind) -> bool {
@@ -213,7 +215,7 @@ impl Parser<'_> {
         }
     }
 
-    fn parse_def(&mut self) -> Declaration {
+    fn parse_def(&mut self) -> Option<Declaration> {
         let capsulation = if self.consume_optional(TokenKind::PrivateKeyword) {
             Capsulation::Private
         } else {
@@ -222,11 +224,11 @@ impl Parser<'_> {
         };
 
 
-        let field_type = self.consume_expected(TokenKind::Identifier);
+        let field_type = self.consume_expected(TokenKind::Identifier)?;
         let (name, is_constructor) = if self.curr_token().kind == TokenKind::OpenParen {
             (field_type.clone(), true)
         } else {
-            (self.consume_expected(TokenKind::Identifier), false)
+            (self.consume_expected(TokenKind::Identifier)?, false)
         };
 
         if self.consume_optional(TokenKind::OpenParen) {
@@ -234,8 +236,8 @@ impl Parser<'_> {
             let mut params = Vec::new();
 
             while self.curr_token().kind != TokenKind::CloseParen {
-                let param_type = self.consume_expected(TokenKind::Identifier);
-                let name = self.consume_expected(TokenKind::Identifier);
+                let param_type = self.consume_expected(TokenKind::Identifier)?;
+                let name = self.consume_expected(TokenKind::Identifier)?;
                 let param = Parameter(Type(param_type.text), name.text);
 
                 params.push(param);
@@ -250,13 +252,13 @@ impl Parser<'_> {
                     break;
                 }
 
-                self.consume_expected(TokenKind::Comma);
+                self.consume_expected(TokenKind::Comma)?;
             }
 
-            self.consume_expected(TokenKind::CloseParen);
+            self.consume_expected(TokenKind::CloseParen)?;
 
             if !self.consume_optional(TokenKind::SemiColon) {
-                self.consume_expected(TokenKind::OpenCurly);
+                self.consume_expected(TokenKind::OpenCurly)?;
                 let mut curly_stack = 1;
                 let mut curr;
 
@@ -273,12 +275,12 @@ impl Parser<'_> {
                 }
             }
 
-            Declaration::Method(
+            Some(Declaration::Method(
                 if is_constructor {
                     Method::new_constructor(name.text, params, capsulation)
                 } else {
                     Method::new(name.text, Type(field_type.text), params, capsulation)
-                })
+                }))
         } else {
             if self.curr_token().kind == TokenKind::Equal {
                 self.consume_token();
@@ -287,21 +289,21 @@ impl Parser<'_> {
                 }
             }
 
-            self.consume_expected(TokenKind::SemiColon);
-            Declaration::Field(Field::new(Type(field_type.text), name.text, capsulation))
+            self.consume_expected(TokenKind::SemiColon)?;
+            Some(Declaration::Field(Field::new(Type(field_type.text), name.text, capsulation)))
         }
     }
 
-    pub fn parse_class_def(&mut self) -> Class {
-        self.consume_expected(TokenKind::ClassKeyword);
-        let name = self.consume_expected(TokenKind::Identifier);
-        self.consume_expected(TokenKind::OpenCurly);
+    pub fn parse_class_def(&mut self) -> Option<Class> {
+        self.consume_expected(TokenKind::ClassKeyword)?;
+        let name = self.consume_expected(TokenKind::Identifier)?;
+        self.consume_expected(TokenKind::OpenCurly)?;
         let mut start_pos = self.pos;
         let mut fields = Vec::new();
         let mut methods = Vec::new();
 
         while self.curr_token().kind != TokenKind::CloseCurly {
-            let def = self.parse_def();
+            let def = self.parse_def()?;
             match def {
                 Declaration::Field(field) => fields.push(field),
                 Declaration::Method(method) => methods.push(method),
@@ -314,8 +316,8 @@ impl Parser<'_> {
             start_pos = self.pos;
         }
 
-        self.consume_expected(TokenKind::CloseCurly);
+        self.consume_expected(TokenKind::CloseCurly)?;
 
-        Class::new(name.text, fields, methods)
+        Some(Class::new(name.text, fields, methods))
     }
 }

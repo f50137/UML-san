@@ -11,10 +11,10 @@
 -   [x] Parse comments
 -   [x] Parse constructor
 -   [?] Parse Array declarations and type annotations
--   [ ] Parse field default definitions
+-   [x] Parse field default definitions
+-   [ ] Improve Error reporting
 -   [ ] Parse/ignore more keywords (static/abstract/final)
 -   [ ] Improve security of Method body parsing (Strings etc.)
--   [ ] Improve Error reporting
 -   [ ] Parse Generic stuff
 -   [ ] Parse annotations (@Override)
 

@@ -77,6 +77,8 @@ fn main() -> io::Result<()> {
         std::process::exit(1);
     }
 
+    let class = class.unwrap();
+
     set_trace_log(TraceLogType::LOG_NONE);
     let (mut rl, thread) = raylib::init().size(WINDOW_WIDTH, WINDOW_HEIGHT).title("UML-san uwu").build();
     rl.set_target_fps(60);
