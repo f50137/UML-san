@@ -12,8 +12,8 @@
 -   [x] Parse constructor
 -   [?] Parse Array declarations and type annotations
 -   [x] Parse field default definitions
--   [ ] Improve Error reporting
--   [ ] Parse/ignore more keywords (static/abstract/final)
+-   [?] Improve Error reporting
+-   [x] Parse/ignore more keywords (static/abstract/final)
 -   [ ] Improve security of Method body parsing (Strings etc.)
 -   [ ] Parse Generic stuff
 -   [ ] Parse annotations (@Override)

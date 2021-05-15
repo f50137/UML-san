@@ -5,14 +5,15 @@ pub struct Type(pub String);
 pub enum Capsulation {
     Public,
     Private,
+    Protected,
 }
 
 impl Capsulation {
     fn to_char(&self) -> char {
-        if self == &Self::Public {
-            '+'
-        } else {
-            '-'
+        match *self {
+            Self::Public => '+',
+            Self::Private => '-',
+            Self::Protected => '#'
         }
     }
 }

@@ -37,4 +37,12 @@ class Person {
             return "Nested blocks in functions also work";
         }
     }
+
+    public static void main(String[] args) {
+        System.out.println("Khello World");
+    }
+
+    protected void protectedMethod() {
+        System.out.println("" + age);
+    }
 }

@@ -23,6 +23,10 @@ enum TokenKind {
     ClassKeyword,
     PublicKeyword,
     PrivateKeyword,
+    FinalKeyword,
+    AbstractKeyword,
+    ProtectedKeyword,
+    StaticKeyword,
     
     OpenCurly,
     CloseCurly,
@@ -42,7 +46,25 @@ impl TokenKind {
             "class" => TokenKind::ClassKeyword,
             "private" => TokenKind::PrivateKeyword,
             "public" => TokenKind::PublicKeyword,
+            "static" => TokenKind::StaticKeyword,
+            "protected" => TokenKind::ProtectedKeyword,
+            "abstract" => TokenKind::AbstractKeyword,
+            "final" => TokenKind::FinalKeyword,
+
             _ => TokenKind::Identifier,
+        }
+    }
+
+    fn is_keyword(&self) -> bool {
+        match self {
+            TokenKind::ClassKeyword | 
+            TokenKind::PrivateKeyword |
+            TokenKind::PublicKeyword |
+            TokenKind::StaticKeyword |
+            TokenKind::ProtectedKeyword |
+            TokenKind::AbstractKeyword |
+            TokenKind::FinalKeyword => true,
+            _ => false
         }
     }
 }
@@ -215,14 +237,36 @@ impl Parser<'_> {
         }
     }
 
-    fn parse_def(&mut self) -> Option<Declaration> {
-        let capsulation = if self.consume_optional(TokenKind::PrivateKeyword) {
-            Capsulation::Private
-        } else {
-            self.consume_optional(TokenKind::PublicKeyword);
-            Capsulation::Public
-        };
+    fn parse_keywords(&mut self) -> Vec<Token> {
+        let mut keywords = Vec::new();
+        
+        while self.curr_token().kind.is_keyword() {
+            keywords.push(self.consume_token());
+        }
 
+        keywords
+    }
+
+
+    fn parse_def(&mut self) -> Option<Declaration> {
+        let keywords = self.parse_keywords();
+        let capsulation = {
+            let caps_keyword = keywords
+                               .iter()
+                               .find(|k| k.kind == TokenKind::PrivateKeyword
+                                      || k.kind == TokenKind::PublicKeyword
+                                      || k.kind == TokenKind::ProtectedKeyword);
+            if caps_keyword.is_some() {
+                match caps_keyword.unwrap().kind {
+                    TokenKind::PrivateKeyword => Capsulation::Private,
+                    TokenKind::PublicKeyword => Capsulation::Public,
+                    TokenKind::ProtectedKeyword => Capsulation::Protected,
+                    _ => unreachable!()
+                }
+            } else {
+                Capsulation::Public
+            }
+        };
 
         let field_type = self.consume_expected(TokenKind::Identifier)?;
         let (name, is_constructor) = if self.curr_token().kind == TokenKind::OpenParen {
@@ -304,6 +348,7 @@ impl Parser<'_> {
 
         while self.curr_token().kind != TokenKind::CloseCurly {
             let def = self.parse_def()?;
+
             match def {
                 Declaration::Field(field) => fields.push(field),
                 Declaration::Method(method) => methods.push(method),
