@@ -6,6 +6,7 @@ pub enum Capsulation {
     Public,
     Private,
     Protected,
+    Package,
 }
 
 impl Capsulation {
@@ -13,7 +14,8 @@ impl Capsulation {
         match *self {
             Self::Public => '+',
             Self::Private => '-',
-            Self::Protected => '#'
+            Self::Protected => '#',
+            Self::Package => '~'
         }
     }
 }

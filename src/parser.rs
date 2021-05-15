@@ -57,7 +57,6 @@ impl TokenKind {
 
     fn is_keyword(&self) -> bool {
         match self {
-            TokenKind::ClassKeyword | 
             TokenKind::PrivateKeyword |
             TokenKind::PublicKeyword |
             TokenKind::StaticKeyword |
@@ -256,6 +255,7 @@ impl Parser<'_> {
                                .find(|k| k.kind == TokenKind::PrivateKeyword
                                       || k.kind == TokenKind::PublicKeyword
                                       || k.kind == TokenKind::ProtectedKeyword);
+
             if caps_keyword.is_some() {
                 match caps_keyword.unwrap().kind {
                     TokenKind::PrivateKeyword => Capsulation::Private,
@@ -264,7 +264,7 @@ impl Parser<'_> {
                     _ => unreachable!()
                 }
             } else {
-                Capsulation::Public
+                Capsulation::Package
             }
         };
 
@@ -339,6 +339,7 @@ impl Parser<'_> {
     }
 
     pub fn parse_class_def(&mut self) -> Option<Class> {
+        self.parse_keywords();
         self.consume_expected(TokenKind::ClassKeyword)?;
         let name = self.consume_expected(TokenKind::Identifier)?;
         self.consume_expected(TokenKind::OpenCurly)?;

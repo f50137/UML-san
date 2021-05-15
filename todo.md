@@ -10,13 +10,13 @@
 ## Parser
 -   [x] Parse comments
 -   [x] Parse constructor
--   [?] Parse Array declarations and type annotations
 -   [x] Parse field default definitions
--   [?] Improve Error reporting
 -   [x] Parse/ignore more keywords (static/abstract/final)
 -   [ ] Improve security of Method body parsing (Strings etc.)
 -   [ ] Parse Generic stuff
 -   [ ] Parse annotations (@Override)
+-   [?] Improve Error reporting
+-   [?] Parse Array declarations and type annotations
 
 ## Diagramming
 -   [ ] Parse multiple classes
