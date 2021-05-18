@@ -9,8 +9,8 @@ use parser::Parser;
 
 use raylib::prelude::*;
 
-const WINDOW_WIDTH: i32 = 1280;
-const WINDOW_HEIGHT: i32 = 720;
+const WINDOW_WIDTH: i32 = 720;
+const WINDOW_HEIGHT: i32 = 1280;
 const FONT_SIZE: i32 = 40;
 const UML_PADDING: i32 = 20;
 const UML_ITEM_HEIGHT: i32 = UML_PADDING * 2 + FONT_SIZE;
@@ -65,7 +65,13 @@ fn render_class_font(rl: &mut RaylibDrawHandle, class: &Class, start_x: i32, sta
     }
 }
 fn main() -> io::Result<()> {
-    let source = fs::read_to_string("sample.java")?;
+    let source_file = if let Some(name) = std::env::args().nth(1) {
+        name
+    } else {
+        "sample.java".to_string()
+    };
+
+    let source = fs::read_to_string(&source_file)?;
     let mut parser = Parser::new(&source);
     let class = parser.parse_class_def();
 
