@@ -6,6 +6,8 @@ mod java;
 use java::*;
 mod parser;
 use parser::Parser;
+mod image;
+use image::Image;
 
 use raylib::prelude::*;
 
@@ -64,7 +66,7 @@ fn render_class_font(rl: &mut RaylibDrawHandle, class: &Class, start_x: i32, sta
                         Color::BLACK);
     }
 }
-fn main() -> io::Result<()> {
+fn main2() -> io::Result<()> {
     let source_file = if let Some(name) = std::env::args().nth(1) {
         name
     } else {
@@ -108,4 +110,33 @@ fn main() -> io::Result<()> {
     }
 
     Ok(())
+}
+
+fn main() {
+    set_trace_log(TraceLogType::LOG_NONE);
+    let (mut rl, thread) = raylib::init().size(WINDOW_WIDTH, WINDOW_HEIGHT).title("UML-san uwu").build();
+    rl.set_target_fps(60);
+
+    use freetype::Library;
+
+    const IMAGE_WIDTH: usize = 500;
+    const IMAGE_HEIGHT: usize = 500;
+
+    let mut img = Image::new(IMAGE_WIDTH, IMAGE_HEIGHT);
+    let lib = Library::init().unwrap();
+    let face = lib.new_face("font.ttf", 0).unwrap();
+    
+    img.render_text(10, 10, "Yesu", 23, &face);
+
+    while !rl.window_should_close() {
+        let mut d = rl.begin_drawing(&thread);
+        d.clear_background(Color::RAYWHITE);
+        for x in 0..IMAGE_WIDTH {
+            for y in 0..IMAGE_HEIGHT {
+                let grey_val = img.get(x as u32, y as u32);
+                d.draw_pixel(x as i32, y as i32, Color::new(grey_val, grey_val, grey_val, 255))
+            }
+        }
+    }
+    
 }
