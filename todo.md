@@ -4,8 +4,8 @@
 -   [x] Check for more edge-cases (no methods/no fields/Large Class name)
 -   [x] Use different Font
 -   [ ] Make Heading (Class name) bigger
--   [ ] Save to png file
--   [ ] Use a different library for rendering the diagram
+-   [x] Save to ppm file
+-   [x] Use a different library for rendering the diagram
 
 ## Parser
 -   [x] Parse comments

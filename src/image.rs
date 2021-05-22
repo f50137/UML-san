@@ -1,5 +1,6 @@
 use freetype::face;
 use freetype::bitmap::PixelMode;
+use std::io;
 
 pub struct Image {
     data: Vec<u8>,
@@ -108,5 +109,26 @@ impl Image {
 
         self.render_vertical_line(x, y, y + h, grey_val);
         self.render_vertical_line(x + w, y, y + h, grey_val);
+    }
+
+    pub fn save_to_file_ppm(&self, file_path: &str) -> io::Result<()> {
+        let mut ppm_string = String::from("");
+
+        ppm_string.push_str("P2\n");
+        ppm_string.push_str(&format!("{} {}\n", self.width, self.height));
+        ppm_string.push_str(&format!("{}\n", 255));
+
+        for y in 0..self.height {
+            for x in 0..self.width {
+                ppm_string.push_str(&format!("{} ", self.get(x as u32, y as u32)));
+            }
+            ppm_string.push('\n');
+        }
+
+        use std::fs::File;
+        use std::io::Write;
+        let mut file = File::create(file_path)?;
+        file.write_all(ppm_string.as_bytes())?;
+        Ok(())
     }
 }
