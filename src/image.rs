@@ -13,7 +13,7 @@ impl Image {
         Self {
             width,
             height,
-            data: vec![0; width * height],
+            data: vec![255; width * height],
         }
     }
 
@@ -64,7 +64,7 @@ impl Image {
                     let pos_y = char_start_y + y;
 
                     if 0 <= pos_x && pos_x < self.width as i32 && 0 <= pos_y && pos_y < self.height as i32 {
-                        self.set(pos_x as u32, pos_y as u32, grey_val);
+                        self.set(pos_x as u32, pos_y as u32, 255 - grey_val);
                     }
                 }
             }
@@ -88,5 +88,25 @@ impl Image {
         }
 
         width
+    }
+
+    pub fn render_horizontal_line(&mut self, y: u32, x1: u32, x2: u32, grey_val: u8) {
+        for x in x1..=x2 {
+            self.set(x, y, grey_val);
+        }
+    }
+    
+    pub fn render_vertical_line(&mut self, x: u32, y1: u32, y2: u32, grey_val: u8) {
+        for y in y1..=y2 {
+            self.set(x, y, grey_val);
+        }
+    }
+
+    pub fn render_rect(&mut self, x: u32, y: u32, w: u32, h: u32, grey_val: u8) {
+        self.render_horizontal_line(y,     x, x + w, grey_val);
+        self.render_horizontal_line(y + h, x, x + w, grey_val);
+
+        self.render_vertical_line(x, y, y + h, grey_val);
+        self.render_vertical_line(x + w, y, y + h, grey_val);
     }
 }
